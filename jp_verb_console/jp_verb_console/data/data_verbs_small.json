@@ -1,0 +1,315 @@
+{
+	"verbs":
+	[
+		{"name": "to look 見",
+			"class_type": ["ichidan", "transitive"],
+			"te_form": { "kanji":"見て", "kana":"みて", "en":"mite" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji": "見る", "kana":"みる", "en":"miru"},
+						"negative":{ "kanji":"見ない", "kana":"みない", "en":"minai", "en_alt":"minnai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "見ます","kana":"みます", "en":"mimasu"},
+						"negative":{ "kanji":"見ません", "kana":"みません", "en":"mimasen", "en_alt":"mimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji": "見た", "kana":"みた", "en":"mita"},
+						"negative":{ "kanji":"見なかった", "kana":"みなかった", "en":"minakatta", "en_alt":"minnakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "見ました", "kana":"みました", "en":"mimashita"},
+						"negative":{ "kanji":"見ませんでした", "kana":"みませんでした", "en":"mimasendeshita", "en_alt":"mimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to eat 食",
+			"class_type": ["ichidan", "transitive" ],
+			"te_form": { "kanji":"食べて", "kana":"たべて", "en":"tabete" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"食べる", "kana":"たべる", "en":"taberu"},
+						"negative":{ "kanji":"食べない", "kana":"たべない", "en":"tabenai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "食べます", "kana":"たべます", "en":"tabemasu"},
+						"negative":{ "kanji":"食べません", "kana":"たべません", "en":"tabemasen", "en_alt":"tabemasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"食べた", "kana":"たべた", "en":"tabeta"},
+						"negative":{ "kanji": "食べなかった", "kana":"たべなかった", "en":"tabenakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji":"食べました", "kana":"たべました", "en":"tabemashita"},
+						"negative":{ "kanji": "食べませんでした", "kana":"たべませんでした", "en":"tabemasendeshita", "en_alt":"tabemasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to speak 話",
+			"class_type": ["godan", "transitive"],
+			"te_form": { "kanji":"話して", "kana":"はなして", "en":"hanashite" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"話す", "kana":"はなす", "en":"hanasu"},
+						"negative":{ "kanji":"話さない",  "kana":"はなさない", "en":"hanasanai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "話します", "kana":"はなします", "en":"hanashimasu"},
+						"negative":{ "kanji":"話しません", "kana":"はなしません", "en":"hanashimasen", "en_alt":"hanashimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"話した", "kana":"はなした", "en":"hanashita"},
+						"negative":{ "kanji":"話さなかった", "kana":"はなさなかった", "en":"hanasanakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "話しました", "kana":"はなしました", "en":"hanashimashita"},
+						"negative":{ "kanji": "話しませんでした", "kana":"はなしませんでした", "en":"hanashimasendeshita", "en_alt":"hanashimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to meet 会",
+			"class_type": ["godan", "intransitive"],
+			"te_form": { "kanji":"会って", "kana":"あって", "en":"atte" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"会う", "kana":"あう", "en":"au"},
+						"negative":{ "kanji":"会わない", "kana":"あわない", "en":"awanai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "会います", "kana":"あいます", "en":"aimasu"},
+						"negative":{ "kanji":"会いません", "kana":"あいません", "en":"aimasen", "en_alt":"aimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"会った", "kana":"あった", "en":"atta"},
+						"negative":{ "kanji":"会わなかった", "kana":"あわなかった", "en":"awanakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "会いました", "kana":"あいました", "en":"aimashita"},
+						"negative":{ "kanji": "会いませんでした", "kana":"あいませんでした", "en":"aimasendeshita", "en_alt":"aimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to come 来",
+			"class_type": ["irregular", "transitive"],
+			"te_form": { "kanji":"来て", "kana":"きて", "en":"kite" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"来る", "kana":"くる", "en":"kuru"},
+						"negative":{ "kanji":"来ない",  "kana":"こない", "en":"konai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "来ます", "kana":"きます", "en":"kimasu"},
+						"negative":{ "kanji":"来ません", "kana":"きません", "en":"kimasen", "en_alt":"kimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"来た", "kana":"きた", "en":"kita"},
+						"negative":{ "kanji":"来なかった", "kana":"こなかった", "en":"konakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "来ました", "kana":"きました", "en":"kimashita"},
+						"negative":{ "kanji": "来ませんでした", "kana":"きませんでした", "en":"kimasendeshita", "en_alt":"kimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to use 使",
+			"class_type": ["godan", "transitive"],
+			"te_form": { "kanji":"使って", "kana":"つかって", "en":"tsukatte" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"使う", "kana":"つかう", "en":"tsukau"},
+						"negative":{ "kanji":"使わない",  "kana":"つかわない", "en":"tsukawanai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "使います", "kana":"つかいます", "en":"tsukaimasu"},
+						"negative":{ "kanji":"使いません", "kana":"つかいません", "en":"tsukaimasen", "en_alt":"tsukaimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"使った", "kana":"つかた", "en":"tsukatta"},
+						"negative":{ "kanji":"使わなかった", "kana":"つかわなかった", "en":"tsukawanakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "使いました", "kana":"つかいました", "en":"tsukaimashita"},
+						"negative":{ "kanji": "使いませんでした", "kana":"つかいませんでした", "en":"tsukaimasendeshita", "en_alt":"tsukaimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to drink 飲",
+			"class_type": ["godan", "transitive"],
+			"te_form": { "kanji":"飲んで", "kana":"のんで", "en":"nonde", "en_alt":"nonnde" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"飲む", "kana":"のむ", "en":"nomu"},
+						"negative":{ "kanji":"飲まない",  "kana":"のまない", "en":"nomanai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "飲みます", "kana":"のみます", "en":"nomimasu"},
+						"negative":{ "kanji":"飲みません", "kana":"のみません", "en":"nomimasen", "en_alt":"nomimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"飲んだ", "kana":"のんだ", "en":"nonda", "en_alt":"nonnda" },
+						"negative":{ "kanji":"飲まなかった", "kana":"のまなかった", "en":"nomanakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "飲みました", "kana":"のみました", "en":"nomimashita"},
+						"negative":{ "kanji": "飲みませんでした", "kana":"のみませんでした", "en":"nomimasendeshita", "en_alt":"nomimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to return　(home) 帰",
+			"class_type": ["godan", "intransitive"],
+			"te_form": { "kanji":"帰って", "kana":"かえって", "en":"kaette" },			
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"帰る", "kana":"かえる", "en":"kaeru"},
+						"negative":{ "kanji":"帰らない",  "kana":"かえらない", "en":"kaeranai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "帰ります", "kana":"かえります", "en":"kaerimasu"},
+						"negative":{ "kanji":"帰りません", "kana":"かえりません", "en":"kaerimasen", "en_alt":"kaerimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"帰った", "kana":"かえった", "en":"kaetta"},
+						"negative":{ "kanji":"帰らなかった", "kana":"かえらなかった", "en":"kaeranakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "帰りました", "kana":"かえｒしました", "en":"kaerimashita"},
+						"negative":{ "kanji": "帰りませんでした", "kana":"かえりませんでした", "en":"kaerimasendeshita", "en_alt":"kaerimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to go 行",
+			"class_type": ["godan", "intransitive" ],
+			"te_form": { "kanji":"行って", "kana":"たべて", "en":"itte" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji": "行く", "kana":"いく", "en":"iku"},
+						"negative":{ "kanji":"行かない", "kana":"いかない", "en":"ikanai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "行きます","kana":"いきます", "en":"ikimasu"},
+						"negative":{ "kanji":"行きません", "kana":"いきません", "en":"ikimasen", "en_alt":"ikimasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji": "行った", "kana":"いった", "en":"itta"},
+						"negative":{ "kanji":"行かなかった", "kana":"いかなかった", "en":"ikanakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "行きました","kana":"いきました", "en":"ikimashita"},
+						"negative":{ "kanji":"行きませんでした", "kana":"いきませんでした", "en":"ikimasendeshita", "en_alt":"ikimasenndeshita"}
+					}
+				}
+			]
+		},
+		{"name": "to sleep 寝",
+			"class_type": ["ichidan", "intransitive" ],
+			"te_form": { "kanji":"寝て", "kana":"", "en":"nete" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji": "寝る", "kana":"ねる", "en":"neru"},
+						"negative":{ "kanji": "寝ない", "kana":"ねない", "en":"nenai"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "寝ます","kana":"ねます", "en":"nemasu"},
+						"negative":{ "kanji":"寝ません", "kana":"ねません", "en":"nemasen", "en_alt":"nemasenn"}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji": "寝た", "kana":"ねた", "en":"neta"},
+						"negative":{ "kanji":"寝なかった", "kana":"ねなかった", "en":"nenakatta"}
+					},
+					"formal":
+					{
+						"positive":{ "kanji": "寝ました","kana":"ねました", "en":"nemashita"},
+						"negative":{ "kanji":"寝ませんでした", "kana":"ねませんでした", "en":"nemasendeshita", "en_alt":"nemasenndeshita"}
+					}
+				}
+			]
+		}
+	]
+}
