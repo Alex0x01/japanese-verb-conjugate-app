@@ -1,0 +1,45 @@
+		{"name": "",
+			"class_type": ["godan", "intransitive" ],
+			"te_form": { "kanji":"", "kana":"", "en":"" },
+			"forms":
+			[
+				{"name":"present_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"", "kana":"", "en":""},
+						"negative":{ "kanji":"", "kana":"", "en":""}
+					},
+					"formal":
+					{
+						"positive":{ "kanji":"","kana":"", "en":""},
+						"negative":{ "kanji":"", "kana":"", "en":"", "en_alt":""}
+					}
+				},
+				{"name":"past_indicative_form",
+					"casual":
+					{
+						"positive":{ "kanji":"", "kana":"", "en":""},
+						"negative":{ "kanji":"", "kana":"", "en":""}
+					},
+					"formal":
+					{
+						"positive":{ "kanji":"","kana":"", "en":""},
+						"negative":{ "kanji":"", "kana":"", "en":"", "en_alt":""}
+					}
+				},
+				{"name":"imperative_form",
+					"casual":
+					{
+						"positive":{ "desc":"", "kanji":"", "kana":"", "en":""},
+						"negative":{ "desc":"", "kanji":"", "kana":"", "en":""}
+					},
+					"formal":
+					{
+						"positive":{ "desc":"", "kanji":"", "kana":"", "en":"", "en_alt":""},
+						"negative":{ "desc":"", "kanji":"", "kana":"", "en":"", "en_alt":""}
+					}
+				}
+			]
+		}		
+"LATER"
+		{"name": "to do 致",

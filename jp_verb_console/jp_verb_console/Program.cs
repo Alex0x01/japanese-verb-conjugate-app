@@ -19,15 +19,16 @@ namespace jp_verb_console
     internal class Program
     {
         #region JSON_DATA
-        
+        public const int iMAX_ENGLISH_VERB = 6;
+
         // this lot is for JSON serialization, if you change it, it will probably all break.
         //=================================================================================================
         public class Verb_Data
         {
-            public string kanji { get; set; }
-            public string kana { get; set; }
-            public string en { get; set; }
-            public string en_alt { get; set; }
+            public string desc { get; set; }        // description in english
+            public string kanji { get; set; }       // kanji form
+            public string kana { get; set; }        // kana form
+            public string[] en { get; set; }        // list of acceptable english answers, e.g. [masen, masenn] - *note* all spaces are stripped from these and user input when comparing
         }
 
         public class Verb_LanguageType
@@ -78,7 +79,7 @@ namespace jp_verb_console
             casual_positive,    // all verb conjugates will have have this (excluding te form)
             casual_negative,    // all verb conjugates will have have this (excluding te form)
             formal_positive,    // all verb conjugates will have have this (excluding te form)
-            formal_negative,    // all verb conjugates will have have this (excluding te form)   
+            formal_negative,    // all verb conjugates will have have this (excluding te form)
             te_form,            // te form is a weird exception so it has to be "treat" differently
             _num_formats
         }
@@ -139,7 +140,9 @@ namespace jp_verb_console
             for ( int i = 0; i < iNUM_SEEDS; ++i )
                 randoms[i] = new Random();
             Random seed = new Random();
-            const int iNUM_POSSIBLE_ANSWERS = 4;
+
+            // Verb_Data - kanji, kana, + possible english
+            const int iNUM_POSSIBLE_ANSWERS = 2 + iMAX_ENGLISH_VERB;// 4; 
 
             int iMaxPossibleQuestions = xVerbs.verbs.Length; // this counts for the te-forms
             for ( int i = 0; i < xVerbs.verbs.Length; ++i )
@@ -480,6 +483,7 @@ namespace jp_verb_console
                 // 2) build question strings from the data
                 Verb_Data currentVerbData = null;
                 string currentFormName = string.Empty;
+                string currentFormDesc = "";
 
                 if ( question.eFormatType == E_VerbFormat.te_form )
                 {
@@ -492,7 +496,7 @@ namespace jp_verb_console
                     Verb_Form vf = arrForms[question.iVerbFormIndex];
                     string formName = string.Format("[{0}]", vf.name );
                     currentFormName = formName.Replace( "_", " " );
-
+                    
                     switch ( question.eFormatType )
                     {
                         case E_VerbFormat.casual_positive: currentVerbData = vf.casual.positive; break;  
@@ -501,6 +505,8 @@ namespace jp_verb_console
                         case E_VerbFormat.formal_negative: currentVerbData = vf.formal.negative; break;
                         default: break;
                     }
+
+                    currentFormDesc = currentVerbData.desc;
                 }
                 // quick 
                 if ( currentVerbData == null )
@@ -521,10 +527,11 @@ namespace jp_verb_console
                 strVerbClasses += "]";
 
                 // 3) build question str
-                string strQuestion = string.Format( "Q{0}) Verb: {1} {2} {3} {4}",
+                string strQuestion = string.Format( "Q{0}) Verb: {1} {2} \n\"{3}\"\n{4}, {5}",
                     iLoopIter,
                     verb.name,
                     currentFormName,
+                    currentFormDesc,
                     strFmtType.Replace( "_", "-" ) ,
                     strVerbClasses);
 
@@ -532,9 +539,14 @@ namespace jp_verb_console
                 {
                     answers[0] = currentVerbData.kanji;
                     answers[1] = currentVerbData.kana;
-                    answers[2] = currentVerbData.en;
-                    if ( !string.IsNullOrEmpty( currentVerbData.en_alt ) )
-                        answers[3] = currentVerbData.en_alt;
+                    int iOffset = 1;
+                    for ( int en = 0; en < currentVerbData.en.Length; ++en )
+                    {
+                        if ( !string.IsNullOrEmpty( currentVerbData.en[en] ) )
+                        {
+                            answers[++iOffset] = currentVerbData.en[en];
+                        }
+                    }
                 }
 
                 // 5) fetch answer
@@ -564,7 +576,8 @@ namespace jp_verb_console
                     bool bFailed = true;
                     for ( int i = 0; i < iNUM_POSSIBLE_ANSWERS; ++i )
                     {
-                        if ( !string.IsNullOrEmpty(answers[i]) && answers[i] == strAnswer )
+                        string strippedPossibleAnswer = answers[i].Replace( " ", "" );
+                        if ( !string.IsNullOrEmpty( strippedPossibleAnswer ) && (strippedPossibleAnswer == strAnswer) )
                         {
                             Console.WriteLine( "Correct! {0}", answers[0] );
                             bFailed = false;
@@ -632,19 +645,19 @@ namespace jp_verb_console
                     {
                         case E_VerbFormat.casual_positive: 
                             strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.positive.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.positive.en;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.positive.en[0];
                             break;
                         case E_VerbFormat.casual_negative: 
                             strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.negative.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.negative.en;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.negative.en[0];
                             break;
                         case E_VerbFormat.formal_positive:
                             strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.positive.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.positive.en;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.positive.en[0];
                             break;
                         case E_VerbFormat.formal_negative: 
                             strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.negative.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.negative.en;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.negative.en[0];
                             break;
                         default:
                             break;
