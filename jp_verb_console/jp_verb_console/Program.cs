@@ -58,17 +58,32 @@ namespace jp_verb_console
         {
             public Verb_Obj[] verbs { get; set; }
         };
-        #endregion
+
+        // Gramar
+        public class Grammar_Obj
+        {
+            public string[] english { get; set; }
+            public string[] japanese { get; set; }
+            public string[] examples { get; set; }
+
+        };
+
+        public class Grammar_Obj_List
+        {
+            public Grammar_Obj[] grammar_list { get; set; }
+        };
+        #endregion // JSON_DATA
         //=================================================================================================
 
         public enum E_GameMode
         {
-            Random,           // randomly pick from everything
-            All,              // do everything from top to bottom
-            SingleFormat,     // pass in one format, and do that single format for each verb e.g. te form
-            SingleAll,        // same as single format but loops through each format
-            RepeatVerb,       // just do the same one over and over, require -repeat_verb
-            ReviseMode,
+            Verb_Random,           // randomly pick from everything
+            Verb_All,              // do everything from top to bottom
+            Verb_SingleFormat,     // pass in one format, and do that single format for each verb e.g. te form
+            Verb_SingleAll,        // same as single format but loops through each format
+            Verb_RepeatVerb,       // just do the same one over and over, require -repeat_verb
+            Verb_ReviseMode,
+            Grammar_Random,
             _E_NumGameModes
         };
 
@@ -83,37 +98,38 @@ namespace jp_verb_console
             te_form,            // te form is a weird exception so it has to be "treat" differently
             _num_formats
         }
+        //=================================================================================================
 
         // a clump of data, with defaults, we can add args to the cmd line to set these. pass -help to see.
         public class CmdArgs
         {
             public List<int> iSingleVerbIndexes = new List<int>();
             public E_VerbFormat eSingleFormatMode = E_VerbFormat.casual_positive;
-            public E_GameMode eGameMode = E_GameMode.SingleAll;
+            public E_GameMode eGameMode = E_GameMode.Verb_SingleAll;
             public int iNumQuestions = 10;
             
             // ...etc, add whatever
         };
 
         // this blob of data is re-used for each "game tick", it is built based on the game mode and other various data.
-        public class Question
+        public class Verb_Question
         {
             public int iVerbIndex = 0;
             public int iVerbFormIndex = 0;
             public E_VerbFormat eFormatType = E_VerbFormat.NULL;
 
-            public Question()
+            public Verb_Question()
             {
             }
 
-            public Question( int verbIndex, int verbFormIndex, E_VerbFormat formatType )
+            public Verb_Question( int verbIndex, int verbFormIndex, E_VerbFormat formatType )
             {
                 this.iVerbIndex = verbIndex;
                 this.iVerbFormIndex = verbFormIndex;
                 this.eFormatType = formatType;
             }
 
-            public Question( Question rhs )
+            public Verb_Question( Verb_Question rhs )
             {
                 this.iVerbIndex = rhs.iVerbIndex;
                 this.iVerbFormIndex = rhs.iVerbFormIndex;
@@ -124,25 +140,86 @@ namespace jp_verb_console
 
         public class GameResult
         {
+            public string strResultMsg = string.Empty;
             public bool bResult = false;
             public int iNumQuestionsCorrect = 0;
             public int iNumQuestionsIncorrect = 0;
-            public string strResultMsg = string.Empty;
         };
 
-        public static List<Question> s_reviseList = new List<Question>();
+        const int iNUM_SEEDS = 3;
+        public static List<Verb_Question> s_xVerbReviseList = new List<Verb_Question>();
+        public static Random[] s_xRandoms = new Random[iNUM_SEEDS];
+        public static Random s_xSeed = new Random();
+        //=================================================================================================
 
-        static public GameResult MainLoop( CmdArgs cmdArgs, Verb_Arr xVerbs )
+        public static string StripNonAlphaNumerics( string s )
         {
-            // random seeds
-            int iNUM_SEEDS = 3;
-            Random[] randoms = new Random[iNUM_SEEDS];
-            for ( int i = 0; i < iNUM_SEEDS; ++i )
-                randoms[i] = new Random();
-            Random seed = new Random();
+            return new string( Regex.Replace( s, "[^a-zA-Z0-9]", "" ) );
+        }
 
+        #region Verbs
+        public static async Task Verb_SaveReviseListAsync( Verb_Arr xVerbs, string strFileName )
+        {
+            string[] lines = new string[s_xVerbReviseList.Count];
+            for ( int i = 0; i < s_xVerbReviseList.Count; ++i )
+            {
+                Verb_Question q = s_xVerbReviseList[i];
+                string strForm = string.Empty;
+                string strFormEng = string.Empty;
+                if ( q.eFormatType == E_VerbFormat.te_form )
+                {
+                    strForm = xVerbs.verbs[q.iVerbIndex].te_form.kanji;
+                }
+                else
+                {
+                    switch ( q.eFormatType )
+                    {
+                        case E_VerbFormat.casual_positive:
+                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.positive.kanji;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.positive.en[0];
+                            break;
+                        case E_VerbFormat.casual_negative:
+                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.negative.kanji;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.negative.en[0];
+                            break;
+                        case E_VerbFormat.formal_positive:
+                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.positive.kanji;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.positive.en[0];
+                            break;
+                        case E_VerbFormat.formal_negative:
+                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.negative.kanji;
+                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.negative.en[0];
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                string strLine = string.Format( "{0},{1},{2} : {3},{4},{5}",
+                    q.iVerbIndex, q.iVerbFormIndex, (int)q.eFormatType,
+                    xVerbs.verbs[q.iVerbIndex].name,
+                    strFormEng,
+                    strForm );
+
+                lines[i] = strLine;
+            }
+
+            await File.WriteAllLinesAsync( strFileName, lines );
+        }
+
+        public static async Task<string[]> Verb_LoadReviseListAsync( string strFileName )
+        {
+            Task<string[]> lines = File.ReadAllLinesAsync( strFileName );
+            await lines;
+            return lines.GetAwaiter().GetResult();
+        }
+
+        static public GameResult MainLoopVerbs( CmdArgs cmdArgs, Verb_Arr xVerbs )
+        {
+            for ( int i = 0; i < iNUM_SEEDS; ++i ) s_xRandoms[i] = new Random();
+            
             // Verb_Data - kanji, kana, + possible english
-            const int iNUM_POSSIBLE_ANSWERS = 2 + iMAX_ENGLISH_VERB;// 4; 
+            const int iNUM_POSSIBLE_ANSWERS = 2 + iMAX_ENGLISH_VERB; 
 
             int iMaxPossibleQuestions = xVerbs.verbs.Length; // this counts for the te-forms
             for ( int i = 0; i < xVerbs.verbs.Length; ++i )
@@ -158,33 +235,38 @@ namespace jp_verb_console
 
             // used in random mode, to break the loop (based on numQuestions)
             int iLoopIter = 1;
+            
             // this is used for index bounds, it's cached on the first question, because of ordering
             int iCachedCurrentVerbNumTypes = 0;
             int iCachedReviseListSize = 0;
             int iReviseListIndex = 0;
 
             // don't repeat the questions in random mode with this
-            List<Question> doneList = new List<Question>();
-            List<Question> todoList = new List<Question>(); // built from revise list
+            List<Verb_Question> doneList = new List<Verb_Question>();
+            List<Verb_Question> todoList = new List<Verb_Question>(); // built from revise list
 
             // for japanese chars
             Console.OutputEncoding = System.Text.Encoding.Unicode;
             Console.InputEncoding = System.Text.Encoding.Unicode;
 
             // build this up each iteration from game mode, and re-use it
-            Question question = new Question();
+            Verb_Question question = new Verb_Question();
             GameResult result = new GameResult();
 
             const string strQuit1 = "quitgame", strQuit2 = "exitgame";
 
+            string strCurrentGameMode = cmdArgs.eGameMode.ToString();
+            strCurrentGameMode = strCurrentGameMode.Replace( "_", " " );
+
             // display game mode settings (could be from cmd line)
             {
-                Console.WriteLine( "Game Mode : {0}", cmdArgs.eGameMode.ToString() );
-                if ( cmdArgs.eGameMode == E_GameMode.Random )
+                Console.WriteLine( "Game Mode : {0}", strCurrentGameMode );
+                
+                if ( cmdArgs.eGameMode == E_GameMode.Verb_Random )
                     Console.WriteLine( "Num Questions: {0}", cmdArgs.iNumQuestions );
-                if ( cmdArgs.eGameMode == E_GameMode.SingleFormat )
+                if ( cmdArgs.eGameMode == E_GameMode.Verb_SingleFormat )
                     Console.WriteLine( "Single format: {0}", cmdArgs.eSingleFormatMode.ToString() );
-                if ( cmdArgs.eGameMode == E_GameMode.RepeatVerb )
+                if ( cmdArgs.eGameMode == E_GameMode.Verb_RepeatVerb )
                 {
                     for ( int v = 0; v < cmdArgs.iSingleVerbIndexes.Count; ++v )
                     {
@@ -205,9 +287,9 @@ namespace jp_verb_console
             }
 
             // Load the revise list
-            if ( cmdArgs.eGameMode == E_GameMode.ReviseMode )
+            if ( cmdArgs.eGameMode == E_GameMode.Verb_ReviseMode )
             {
-                Task<string[]> task = LoadReviseListAsync( "revise_list.txt" );
+                Task<string[]> task = Verb_LoadReviseListAsync( "revise_list.txt" );
                 while ( !task.IsCompleted )
                 {
                 }
@@ -233,7 +315,7 @@ namespace jp_verb_console
                         int iVerbIndex = Convert.ToInt32( q[0] );
                         int iVerbFormIndex = Convert.ToInt32( q[1] );
                         int iType = Convert.ToInt32( q[2] );
-                        todoList.Add( new Question( iVerbIndex, iVerbFormIndex, (E_VerbFormat)iType ) );
+                        todoList.Add( new Verb_Question( iVerbIndex, iVerbFormIndex, (E_VerbFormat)iType ) );
                     }
                 }
             }
@@ -241,11 +323,11 @@ namespace jp_verb_console
             while ( true )
             {
                 // 1) calc question index based on game mode
-                if ( cmdArgs.eGameMode == E_GameMode.Random )
+                if ( cmdArgs.eGameMode == E_GameMode.Verb_Random )
                 {
                     if ( iLoopIter > cmdArgs.iNumQuestions )
                     {
-                        result.iNumQuestionsIncorrect = s_reviseList.Count;
+                        result.iNumQuestionsIncorrect = s_xVerbReviseList.Count;
                         result.iNumQuestionsCorrect = cmdArgs.iNumQuestions - result.iNumQuestionsIncorrect;
                         result.strResultMsg = "All Questions completed.";
                         result.bResult = true;
@@ -253,12 +335,12 @@ namespace jp_verb_console
                         break;
                     }
 
-                    question.iVerbIndex = randoms[seed.Next( iNUM_SEEDS )].Next( xVerbs.verbs.Length );
-                    question.eFormatType = (E_VerbFormat)randoms[seed.Next( iNUM_SEEDS )].Next( (int)E_VerbFormat._num_formats );
+                    question.iVerbIndex = s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( xVerbs.verbs.Length );
+                    question.eFormatType = (E_VerbFormat)s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( (int)E_VerbFormat._num_formats );
                     if ( question.eFormatType == E_VerbFormat.te_form )
                         question.iVerbFormIndex = -1;
                     else
-                        question.iVerbFormIndex = randoms[seed.Next( iNUM_SEEDS )].Next( xVerbs.verbs[question.iVerbIndex].forms.Length );
+                        question.iVerbFormIndex = s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( xVerbs.verbs[question.iVerbIndex].forms.Length );
 
                     // re-roll
                     int iAttempts = 2048;
@@ -270,18 +352,18 @@ namespace jp_verb_console
                             doneList.Clear();
                         }
 
-                        question.iVerbIndex = randoms[seed.Next( iNUM_SEEDS )].Next( xVerbs.verbs.Length );
-                        question.eFormatType = (E_VerbFormat)randoms[seed.Next( iNUM_SEEDS )].Next( (int)E_VerbFormat._num_formats );
+                        question.iVerbIndex = s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( xVerbs.verbs.Length );
+                        question.eFormatType = (E_VerbFormat)s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( (int)E_VerbFormat._num_formats );
                         if ( question.eFormatType == E_VerbFormat.te_form )
                             question.iVerbFormIndex = -1;
                         else
-                            question.iVerbFormIndex = randoms[seed.Next( iNUM_SEEDS )].Next( xVerbs.verbs[question.iVerbIndex].forms.Length );
+                            question.iVerbFormIndex = s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( xVerbs.verbs[question.iVerbIndex].forms.Length );
                     }
 
                     // add to the done list then
-                    doneList.Add( new Question( question ) ); // use implicit copy ctor, stop shitty c# using references
+                    doneList.Add( new Verb_Question( question ) ); // use implicit copy ctor, stop shitty c# using references
                 }
-                else if ( cmdArgs.eGameMode == E_GameMode.All )
+                else if ( cmdArgs.eGameMode == E_GameMode.Verb_All )
                 {
                     if ( iLoopIter == 1 )
                     {
@@ -304,8 +386,8 @@ namespace jp_verb_console
                             {
                                 result.bResult = true;
                                 result.strResultMsg = "All questions completed";
-                                result.iNumQuestionsIncorrect = s_reviseList.Count;
-                                result.iNumQuestionsCorrect = iMaxPossibleQuestions - s_reviseList.Count;
+                                result.iNumQuestionsIncorrect = s_xVerbReviseList.Count;
+                                result.iNumQuestionsCorrect = iMaxPossibleQuestions - s_xVerbReviseList.Count;
                                 // done
                                 break;
                             }
@@ -326,7 +408,7 @@ namespace jp_verb_console
                         }
                     }
                 }
-                else if ( cmdArgs.eGameMode == E_GameMode.SingleFormat )
+                else if ( cmdArgs.eGameMode == E_GameMode.Verb_SingleFormat )
                 {
                     question.eFormatType = cmdArgs.eSingleFormatMode;
                     bool bIncVerb = false;
@@ -356,19 +438,19 @@ namespace jp_verb_console
                         {
                             result.bResult = true;
                             result.strResultMsg = "All single format questions completed";
-                            result.iNumQuestionsIncorrect = s_reviseList.Count;
+                            result.iNumQuestionsIncorrect = s_xVerbReviseList.Count;
 
                             // none te form has both positive and negative so * 2
                             int iMaxSingleQuestions = question.eFormatType == E_VerbFormat.te_form
                                 ? xVerbs.verbs.Length
                                 : xVerbs.verbs.Length * 2;
-                            result.iNumQuestionsCorrect = iMaxSingleQuestions - s_reviseList.Count;
+                            result.iNumQuestionsCorrect = iMaxSingleQuestions - s_xVerbReviseList.Count;
                             // done
                             break;
                         }
                     }
                 }
-                else if ( cmdArgs.eGameMode == E_GameMode.SingleAll )
+                else if ( cmdArgs.eGameMode == E_GameMode.Verb_SingleAll )
                 {
                     if ( question.eFormatType == E_VerbFormat.NULL )
                         ++question.eFormatType;
@@ -401,15 +483,15 @@ namespace jp_verb_console
                             {
                                 result.bResult = true;
                                 result.strResultMsg = "All questions completed";
-                                result.iNumQuestionsIncorrect = s_reviseList.Count;
-                                result.iNumQuestionsCorrect = iMaxPossibleQuestions - s_reviseList.Count;
+                                result.iNumQuestionsIncorrect = s_xVerbReviseList.Count;
+                                result.iNumQuestionsCorrect = iMaxPossibleQuestions - s_xVerbReviseList.Count;
                                 // done
                                 break;
                             }
                         }
                     }
                 }
-                else if ( cmdArgs.eGameMode == E_GameMode.RepeatVerb )
+                else if ( cmdArgs.eGameMode == E_GameMode.Verb_RepeatVerb )
                 {
                     if ( cmdArgs.iSingleVerbIndexes.Count == 0 )
                     {
@@ -451,14 +533,14 @@ namespace jp_verb_console
                         }
                     }
                 }
-                else if ( cmdArgs.eGameMode == E_GameMode.ReviseMode )
+                else if ( cmdArgs.eGameMode == E_GameMode.Verb_ReviseMode )
                 {
                     if ( todoList.Count == 0 || iReviseListIndex >= todoList.Count )
                     {
                         result.bResult = true;
                         result.strResultMsg = "Nothing left in revise list";
-                        result.iNumQuestionsIncorrect = s_reviseList.Count;
-                        result.iNumQuestionsCorrect = iCachedReviseListSize - s_reviseList.Count;
+                        result.iNumQuestionsIncorrect = s_xVerbReviseList.Count;
+                        result.iNumQuestionsCorrect = iCachedReviseListSize - s_xVerbReviseList.Count;
                         break;
                     }
 
@@ -484,7 +566,6 @@ namespace jp_verb_console
                 Verb_Data currentVerbData = null;
                 string currentFormName = string.Empty;
                 string currentFormDesc = "";
-
                 if ( question.eFormatType == E_VerbFormat.te_form )
                 {
                     // te form
@@ -508,6 +589,7 @@ namespace jp_verb_console
 
                     currentFormDesc = currentVerbData.desc;
                 }
+                
                 // quick 
                 if ( currentVerbData == null )
                 {
@@ -563,8 +645,8 @@ namespace jp_verb_console
                 // check for quit
                 if ( strAnswer == strQuit1 || strAnswer == strQuit2 )
                 {
-                    result.iNumQuestionsIncorrect = s_reviseList.Count;
-                    result.iNumQuestionsCorrect = iLoopIter - s_reviseList.Count;
+                    result.iNumQuestionsIncorrect = s_xVerbReviseList.Count;
+                    result.iNumQuestionsCorrect = iLoopIter - s_xVerbReviseList.Count;
                     result.bResult = true;
                     result.strResultMsg = "User quit, game completed.";
                     // done
@@ -587,7 +669,7 @@ namespace jp_verb_console
                     if ( bFailed )
                     {
                         Console.WriteLine( "Answer is incorrect the answer is: {0} {1}", answers[2], answers[0] );
-                        s_reviseList.Add( new Question( question ) );
+                        s_xVerbReviseList.Add( new Verb_Question( question ) );
                     }
                 }
 
@@ -603,7 +685,7 @@ namespace jp_verb_console
             Console.WriteLine( "--------------------------------------------------------------------\n" );
 
             // save out all the ones you answered wrong
-            if ( s_reviseList.Count > 0 )
+            if ( s_xVerbReviseList.Count > 0 )
             {
                 Console.WriteLine( "Save and overwrite revision list [Y][Enter] = yes?" );
                 Console.WriteLine( "--------------------------------------------------------------------" );
@@ -612,7 +694,7 @@ namespace jp_verb_console
                 if ( info.Key == ConsoleKey.Y || info.Key == ConsoleKey.Enter )
                 {
                     string strFileName = "revise_list.txt";
-                    Task task = SaveReviseListAsync( xVerbs, strFileName );
+                    Task task = Verb_SaveReviseListAsync( xVerbs, strFileName );
                     while ( !task.IsCompleted )
                     {
                     }
@@ -625,82 +707,216 @@ namespace jp_verb_console
 
             return result;
         }
+        #endregion // Verbs
         //=================================================================================================
 
-        public static async Task SaveReviseListAsync( Verb_Arr xVerbs, string strFileName )
+        #region Grammar
+        static public GameResult MainLoopGrammars( CmdArgs cmdArgs, Grammar_Obj_List xGrammars )
         {
-            string[] lines = new string[s_reviseList.Count];
-            for( int i = 0; i < s_reviseList.Count; ++i )
+            for ( int i = 0; i < iNUM_SEEDS; ++i ) s_xRandoms[i] = new Random();
+
+            GameResult result = new GameResult();
+            
+            // for japanese chars
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+            Console.InputEncoding = System.Text.Encoding.Unicode;
+
+            // consts
+            const string strQuit1 = "quitgame", strQuit2 = "exitgame";
+            const int iJAP_TO_ENG = 0;
+            const int iENG_TO_JAP = 1;
+            int iQUESTION_LIST_SIZE = xGrammars.grammar_list.Length;
+
+            // shrink this if needed, so we don't go out of bounds
+            cmdArgs.iNumQuestions = Math.Min( cmdArgs.iNumQuestions, iQUESTION_LIST_SIZE );
+
+            // vars
+            int iQuestionNumber = -1;
+            int iLoopIter = 1;
+            int iNumWrong = 0;
+            int iQuestionOrderMode = iJAP_TO_ENG;
+
+            List<int> doneList = new List<int>();
+
+            // process
+            while ( true )
             {
-                Question q = s_reviseList[i];
-                string strForm = string.Empty;
-                string strFormEng = string.Empty;
-                if ( q.eFormatType == E_VerbFormat.te_form )
+                // 1) calc question index based on game mode
+                if ( cmdArgs.eGameMode == E_GameMode.Grammar_Random )
                 {
-                    strForm = xVerbs.verbs[q.iVerbIndex].te_form.kanji;
+                    // break, we're done
+                    if ( iLoopIter > cmdArgs.iNumQuestions )
+                    {
+                        result.iNumQuestionsIncorrect = iNumWrong;
+                        result.iNumQuestionsCorrect = cmdArgs.iNumQuestions - result.iNumQuestionsIncorrect;
+                        result.strResultMsg = "All Questions completed.";
+                        result.bResult = true;
+                        break;
+                    }
+
+                    iQuestionNumber = s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( cmdArgs.iNumQuestions );
+
+                    // re-roll
+                    int iAttempts = 2048;
+                    while ( doneList.Contains( iQuestionNumber ) )
+                    {
+                        if ( doneList.Count >= cmdArgs.iNumQuestions || ( --iAttempts <= 0 ) )
+                        {
+                            // we've done all of the questions, or have given up
+                            doneList.Clear();
+                        }
+
+                        iQuestionNumber = s_xRandoms[s_xSeed.Next( iNUM_SEEDS )].Next( cmdArgs.iNumQuestions );
+                    }
+
+                    // add to the done list then
+                    doneList.Add( iQuestionNumber );
                 }
                 else
                 {
-                    switch ( q.eFormatType )
+                    result.bResult = false;
+                    result.strResultMsg = "Error: unhandled game mode";
+                    return result;
+                }
+
+
+                // 2) build question strings from the data
+                Grammar_Obj xCurrentGramObj = xGrammars.grammar_list[iQuestionNumber];
+                if ( xCurrentGramObj == null )
+                {
+                    result.bResult = false;
+                    result.strResultMsg = "Error: internal error, no verb data generated.";
+                    return result;
+                }
+
+                string[] strEnglish = xCurrentGramObj.english;
+                string[] strJapanese = xCurrentGramObj.japanese;
+                if ( strEnglish == null || strJapanese == null || strEnglish.Length == 0 || strJapanese.Length == 0 ||
+                    strEnglish[0] == null || strJapanese[0] == null )
+                {
+                    Console.WriteLine( "*Warning* some data was null" );
+                    goto NextIter;
+                }
+
+                int iNumAnswers = iQuestionOrderMode == iENG_TO_JAP ? strJapanese.Length : strEnglish.Length;
+                string[] strQuestions = iQuestionOrderMode == iENG_TO_JAP ? strEnglish : strJapanese;
+                string[] strAnswers = iQuestionOrderMode == iENG_TO_JAP ? strJapanese : strEnglish;
+                string[] strExamples = xCurrentGramObj.examples;
+
+                // show any other questions
+                string strQuestBuff = "\n";
+                for ( int i = 0; i < strQuestions.Length; ++i )
+                {
+                    strQuestBuff += string.Format( "{0} {1}{2}", "-", strQuestions[i], i<strQuestions.Length-1?"\n":"" );
+                }
+
+                // 3) build question str
+                string strQuestion = string.Format( "Q{0}) {1} possible answers(s): In {2}, what is: {3}",
+                    iLoopIter,
+                    iNumAnswers,
+                    iQuestionOrderMode == iENG_TO_JAP ? "Japanese" : "English",
+                    strQuestBuff);
+
+                // 4) fetch answer
+                Console.WriteLine( strQuestion );
+
+                Console.Write( ">> " );
+                string strUserAnswer = string.Empty;
+                while ( string.IsNullOrEmpty( strUserAnswer ) )
+                {
+                    strUserAnswer = Console.ReadLine();
+                }
+
+                // remove spaces from answer
+                strUserAnswer = strUserAnswer.Replace( " ", "" );
+                strUserAnswer = StripNonAlphaNumerics( strUserAnswer );
+                strUserAnswer = strUserAnswer.ToLower();
+
+                // check for quit
+                if ( strUserAnswer == strQuit1 || strUserAnswer == strQuit2 )
+                {
+                    result.iNumQuestionsIncorrect = s_xVerbReviseList.Count;
+                    result.iNumQuestionsCorrect = iLoopIter - s_xVerbReviseList.Count;
+                    result.bResult = true;
+                    result.strResultMsg = "User quit, game completed.";
+                    break;
+                }
+
+                // 6) check answer
+                {
+                    bool bFailed = true;
+                    for ( int i = 0; i < iNumAnswers; ++i )
                     {
-                        case E_VerbFormat.casual_positive: 
-                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.positive.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.positive.en[0];
+                        string strippedAnswer = strAnswers[i].Replace( " ", "" );
+                        strippedAnswer = StripNonAlphaNumerics( strippedAnswer );
+                        strippedAnswer = strippedAnswer.ToLower();
+
+                        if ( !string.IsNullOrEmpty( strippedAnswer ) && ( strippedAnswer == strUserAnswer ) )
+                        {
+                            bFailed = false;
                             break;
-                        case E_VerbFormat.casual_negative: 
-                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.negative.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].casual.negative.en[0];
-                            break;
-                        case E_VerbFormat.formal_positive:
-                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.positive.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.positive.en[0];
-                            break;
-                        case E_VerbFormat.formal_negative: 
-                            strForm = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.negative.kanji;
-                            strFormEng = xVerbs.verbs[q.iVerbIndex].forms[q.iVerbFormIndex].formal.negative.en[0];
-                            break;
-                        default:
-                            break;
+                        }
+                    }
+
+                    // keep score
+                    iNumWrong += bFailed ? 1 : 0;
+                    
+                    // show possible answers
+                    string strBuff = string.Format( "{0} - Answers: [ ", bFailed ? "!!Incorrect!!" : "*Correct*" );
+                    for ( int i = 0; i < iNumAnswers; ++i )
+                    {
+                        strBuff += string.Format( "\"{0}\"{1}", strAnswers[i], i == iNumAnswers - 1 ? " ]" : ", " );
+                    }
+                    // show any examples
+                    string strExampleBuff = strExamples == null ? string.Empty : "Example(s): [ ";
+                    for ( int i = 0; strExamples != null && i < strExamples.Length; ++i )
+                    {
+                        strExampleBuff += string.Format( "\"{0}\"{1}", strExamples[i], i == strExamples.Length - 1 ? " ]" : ", " );
+                    }
+
+                    // print out possible answers
+                    Console.WriteLine( strBuff );
+
+                    // ask for example
+                    if ( !string.IsNullOrEmpty( strExampleBuff ) )
+                    {
+                        Console.Write( "Practise >> " );
+                        Console.Read();
+
+                        // print out examples (don't check)
+                        Console.WriteLine( strExampleBuff );
                     }
                 }
 
-                string strLine = string.Format( "{0},{1},{2} : {3},{4},{5}",
-                    q.iVerbIndex, q.iVerbFormIndex, (int)q.eFormatType,
-                    xVerbs.verbs[q.iVerbIndex].name,
-                    strFormEng,
-                    strForm );
-
-                lines[i] = strLine;
+            NextIter:
+                Console.WriteLine( "" );
+                ++iLoopIter;
             }
 
-            await File.WriteAllLinesAsync( strFileName, lines );
+            return result;
         }
+        #endregion // Grammar
+        //=================================================================================================
 
-        public static async Task<string[]> LoadReviseListAsync( string strFileName )
-        {
-            Task<string[]> lines = File.ReadAllLinesAsync( strFileName );
-            await lines;
-            return lines.GetAwaiter().GetResult();
-        }
 
         public static void Main( string[] args )
         {
             CmdArgs cmdArgs = new CmdArgs();
 
             Console.WriteLine( "--------------------------------------------------------------------" );
-            Console.WriteLine( "[Verb Conjugation] pass in -help for available args" );
+            Console.WriteLine( "[Japanese Practice] pass in -help for available args" );
             Console.WriteLine( "--------------------------------------------------------------------\n" );
 
             Console.WriteLine( "Please use \"Lucida Console\" instead of the default font(MenuButton>Default>Font)" );
             Console.WriteLine( "--------------------------------------------------------------------\n" );
 
-            string strFileToLoad = string.Empty;
+            string strFileToLoadFromArgs = string.Empty;
 
             // parse args
             for ( int iArg = 0; iArg < args.Length; ++iArg )
             {
-                string cmd = args[iArg].ToLower();
-                switch ( cmd )
+                string strCmdCurrent = args[iArg].ToLower();
+                switch ( strCmdCurrent )
                 {
                     case "-help":
                     {
@@ -744,7 +960,7 @@ namespace jp_verb_console
                             Console.WriteLine( "Error no value for cmd" );
                             break;
                         }
-                        strFileToLoad = args[iNextArg];
+                        strFileToLoadFromArgs = args[iNextArg];
                         iArg++;
                         break;
                     }
@@ -814,37 +1030,46 @@ namespace jp_verb_console
                     }
                     default:
                     {
-                        Console.WriteLine( "Unkown cmd {0}", cmd );
+                        Console.WriteLine( "Unkown cmd {0}", strCmdCurrent );
                         break;
                     }
                 }
             }
 
-            string strFileName = string.IsNullOrEmpty(strFileToLoad) ?
-                "../../../data/data_verbs_small.json" : strFileToLoad;
+            string strFileName = string.IsNullOrEmpty( strFileToLoadFromArgs ) ?
+                "../../../data/data_verbs_small.json" : strFileToLoadFromArgs;
             try
             {
                 byte[] aJsonSrc = File.ReadAllBytes( strFileName );
-                Verb_Arr xVerbs = JsonSerializer.Deserialize<Verb_Arr>( aJsonSrc );
+                GameResult xRes = null;
 
-                // process
-                if ( xVerbs != null )
+                // verb game
+                if ( cmdArgs.eGameMode < E_GameMode.Grammar_Random )
                 {
-                    GameResult xRes = MainLoop( cmdArgs, xVerbs );
-
-                    Console.WriteLine( "Game over: {0}", xRes.bResult ? "Success" : "Failure" );
-                    Console.WriteLine( xRes.strResultMsg );
-                    if ( xRes.bResult )
-                    {
-                        Console.WriteLine( "Questions Correct: {0}. Questions Incorrect {1}", xRes.iNumQuestionsCorrect, xRes.iNumQuestionsIncorrect );
-                    }
-
-                    // Game over man
-                    Console.WriteLine( "--------------------------------------------------------------------" );
-                    Console.WriteLine( "Program finished.... please press any key to exit" );
-                    Console.WriteLine( "--------------------------------------------------------------------" );
-                    Console.ReadKey();
+                    // process
+                    Verb_Arr xVerbs = JsonSerializer.Deserialize<Verb_Arr>( aJsonSrc );
+                    xRes = MainLoopVerbs( cmdArgs, xVerbs );
                 }
+                // grammar
+                else
+                {
+                    Grammar_Obj_List xGrammars = JsonSerializer.Deserialize<Grammar_Obj_List>( aJsonSrc );
+                    xRes = MainLoopGrammars( cmdArgs, xGrammars );
+                }
+
+                // result
+                Console.WriteLine( "Game over: {0}", xRes.bResult ? "Success" : "Failure" );
+                Console.WriteLine( xRes.strResultMsg );
+                if ( xRes.bResult )
+                {
+                    Console.WriteLine( "Questions Correct: {0}. Questions Incorrect {1}", xRes.iNumQuestionsCorrect, xRes.iNumQuestionsIncorrect );
+                }
+
+                // game over man!
+                Console.WriteLine( "--------------------------------------------------------------------" );
+                Console.WriteLine( "Program finished.... please press any key to exit" );
+                Console.WriteLine( "--------------------------------------------------------------------" );
+                Console.ReadKey();
             }
             catch ( Exception ex )
             {

@@ -3,6 +3,10 @@
     "jp_verb_console": {
       "commandName": "Project",
       "commandLineArgs": "-help -mode 4 -num_questions 3 -repeat_verb 0,1"
+    },
+    "grammar": {
+      "commandName": "Project",
+      "commandLineArgs": "-file \"../../../data/grammars.json\" -mode 6 -num_questions 20\r\n"
     }
   }
 }

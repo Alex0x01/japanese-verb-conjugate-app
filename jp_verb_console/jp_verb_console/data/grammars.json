@@ -1,0 +1,96 @@
+{
+	"grammar_list":[
+		{"english": ["How was it?", "How was that?"],
+		 "japanese": ["どうでしたか"],
+		 "examples": ["映画はどうでしたか - How was the movie?"]
+		},
+		{"english": ["A lot", "many", "lots"],
+		 "japanese": ["たくさん", "いっぱい"],
+		 "examples": ["たくさん歩きます - I go walking a lot"]
+		},
+		{"english": ["by the way"],
+		 "japanese": ["ちなみに", "ところで"],
+		 "examples": ["ちなみに、違いは何ですか？ - By the way, what's the difference?"]
+		},
+		{"english": ["that is why", "this is why", "which is why"],
+		 "japanese": ["だから"]
+		},
+		{"english": ["May I?", "Can I?"],
+		 "japanese": ["[Te＋]もいいですか？"],
+		 "examples": ["(あなたの）椅子に座ってもいいですか - May I sit in your chair"]
+		},
+		{"english": ["I want to try something", "I would like to try something", "I want to try"],
+		 "japanese": ["[Te+]みたい", "[Verb Stem+]たい(です)"],
+		 "examples": ["とんこつラーメンを食べってみたい - I want to eat tonkotsu ramen", "食べたい - I want to eat"]
+		},
+		{"english": ["become", "to become"],
+		 "japanese": ["になって"]
+		},
+		{"english": ["for now", "for the time being"],
+		 "japanese": ["とりあえず"]
+		},
+		{"english" : ["have you experienced?", "have you ever?", "have you tried", "have tried", "have done"],
+		 "japanese": ["[Past Short+]ことがあります(か)"],
+		 "examples": ["日本に行ったことがありますか - Have you ever been to Japan"]
+		},
+		{"english": ["while"],
+		 "japanese": ["[Verb Stem+]ながら"]
+		},
+		{"english": ["about", "around"],
+		 "japanese": ["やく"]
+		},
+		{"english": ["not yet"],
+		 "japanese": ["まだ"]
+		},
+		{"english": ["serious", "seriously"],
+		 "japanese": ["まじかい"]
+		},
+		{"english": ["one day", "one time"],
+		 "japanese": ["いつか"]
+		},
+		{"english": ["one more time please", "once more please", "once more", "one more time"],
+		 "japanese": ["もういちど、お願いします", "もういちど、言ってください"]
+		},
+		{"english": ["please take your time", "take your time please", "take your time"],
+		 "japanese": ["ゆっくり　お願いします"]
+		},
+		{"english": ["there"],
+		 "japanese": ["そちら"]
+		},
+		{"english": ["nothing in particular", "nothing  really"],
+		"japanese": ["とくにないです"]
+		},
+		{"english": ["together"],
+		"japanese": ["いっしょ"]
+		},
+		{"english": ["various"],
+		"japanese": ["いろんな"]
+		},
+		{"english": ["various places"],
+		"japanese": ["いろんなところ"]
+		},
+		{"english": ["probably" ],
+		"japanese": ["おそらく" ]
+		},
+		{"english": ["everytime", "always", "all the time" ],
+		"japanese": ["いつも" ],
+		"examples": ["彼はいつも学校に遅れる - He is always late for school."]
+		},
+		{"english": [ "as asual"],
+		"japanese": [ "いつものとおりに"],
+		"examples": ["彼はいつもの通り遅れてきた - He came late as usual."]
+		},
+		{"english": [ "how", "in what way", "by what means​"],
+		"japanese": [ "どうやって"],
+		"examples": ["どうやって侵入した - How did you break in."]
+		},
+		{"english": [ "at first", "first of all", "first off", "to begin with"],
+		"japanese": [ "さいしょに"],
+		"examples": ["最初に水を沸かします - First, boil the water."]
+		},
+		{"english": [ "was like"],
+		"japanese": [ "ようだった"],
+		"examples": ["夢のようだった - It was like a dream."]
+		}
+	]
+}
