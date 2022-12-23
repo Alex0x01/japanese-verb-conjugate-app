@@ -98,6 +98,10 @@
 		},
 		{"english": ["occasionally", "once in a while"],
 		"japanese": ["たまに", "偶に"]
+		},
+		{"english": ["very"],
+		"japanese": ["とても"],
+		"examples": ["今日は仕事でとても忙しかった - Today, I was very busy at work"]
 		}
 	]
 }
